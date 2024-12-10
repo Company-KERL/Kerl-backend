@@ -9,7 +9,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 // Generate JWT Token
 const generateToken = (userId) => {
-  return jwt.sign({ userId }, SECRET_KEY, { expiresIn: "1h" });
+  return jwt.sign({ userId }, SECRET_KEY, { expiresIn: "1w" });
 };
 
 // Generate Username from name
@@ -68,14 +68,17 @@ const login = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res
+        .status(401)
+        .json({ message: "Invalid credentials", success: false });
     }
 
     const token = generateToken(user._id);
@@ -83,21 +86,30 @@ const login = async (req, res) => {
     // Store token in HTTP-only cookie
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,
-      maxAge: 3600000, // 1 hour
+      // secure: true,
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
     });
 
-    res.status(200).json({ message: "Login successful" });
+    res.status(200).json({
+      message: "Login successful",
+      success: true,
+      user: user,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", success: false });
   }
 };
 
 // Logout API
 const logout = (req, res) => {
-  res.clearCookie("authToken");
-  res.status(200).json({ message: "Logout successful" });
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "Strict",
+  });
+  res.json({ message: "Logged out successfully" });
 };
 
 // Protected Route Example
@@ -156,4 +168,31 @@ const updateUser = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, logout, getProfile, updateUser };
+const checkAuth = async (req, res) => {
+  const token = req.cookies.authToken;
+  console.log(token);
+  if (!token) {
+    return res.status(401).json({ isLoggedIn: false });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+    // Now fetch the full user data from the database using the userId
+    const user = await User.findById(decoded.userId).select("-password"); // Exclude the password
+
+    if (!user) {
+      return res.status(404).json({ isLoggedIn: false });
+    }
+    // console.log(user);
+    res.json({
+      isLoggedIn: true,
+      user, // Send the full user data
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ isLoggedIn: false });
+  }
+};
+
+module.exports = { signup, login, logout, getProfile, updateUser, checkAuth };

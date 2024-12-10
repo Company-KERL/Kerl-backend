@@ -10,6 +10,7 @@ router.post("/login", userController.login);
 router.post("/logout", userController.logout);
 router.get("/profile", userController.getProfile);
 router.put("/profile", userController.updateUser);
+router.get("/check-auth", userController.checkAuth);
 
 // Define Product routes
 router.post("/products", productController.addProduct);
