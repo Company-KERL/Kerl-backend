@@ -24,6 +24,10 @@ const CartSchema = new Schema({
         type: Number,
         required: true,
       },
+      selectedSizeIndex: {
+        type: Number,
+        required: true,
+      },
     },
   ],
   totalPrice: {

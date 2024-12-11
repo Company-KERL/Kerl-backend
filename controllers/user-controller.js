@@ -170,7 +170,7 @@ const updateUser = async (req, res) => {
 
 const checkAuth = async (req, res) => {
   const token = req.cookies.authToken;
-  console.log(token);
+  // console.log(token);
   if (!token) {
     return res.status(401).json({ isLoggedIn: false });
   }
