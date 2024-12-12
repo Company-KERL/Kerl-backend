@@ -99,6 +99,29 @@ const getCartItems = async (req, res) => {
   }
 };
 
+//Get the length of the cart
+const getCartLength = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    // Find the cart for the user and populate the product details
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Calculate the total quantity of items in the cart
+    const cartLength = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Return the total quantity
+    res.status(200).json({ message: "Cart retrieved", cartLength });
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving cart", error: error.message });
+  }
+};
+
+
+
 // Update item quantity in the cart
 const updateCartItemQuantity = async (req, res) => {
   const { userId, productId, quantity, selectedSizeIndex } = req.body;
@@ -140,4 +163,5 @@ module.exports = {
   removeItemFromCart,
   getCartItems,
   updateCartItemQuantity,
+  getCartLength
 };
