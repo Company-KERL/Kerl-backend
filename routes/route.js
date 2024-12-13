@@ -26,12 +26,13 @@ router.post("/cart", cartController.addItemToCart);
 router.delete("/cart", cartController.removeItemFromCart);
 router.get("/cart/:userId", cartController.getCartItems);
 router.put("/cart", cartController.updateCartItemQuantity);
-router.get("/cart/:userId/length", cartController.getCartLength );
+router.get("/cart/:userId/length", cartController.getCartLength);
 
 // Define Order routes
 router.post("/orders", orderController.createOrder);
 router.get("/orders/:userId", orderController.getUserOrders);
 router.put("/orders", orderController.updateOrderStatus);
 router.delete("/orders/:orderId", orderController.deleteOrder);
+router.get("/orders/addresses/:userId", orderController.getAddresses);
 
 module.exports = router;

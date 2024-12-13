@@ -2,7 +2,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 
 const createOrder = async (req, res) => {
-  const { userId, items } = req.body;
+  const { userId, items, address } = req.body;
 
   try {
     let totalPrice = 0;
@@ -35,6 +35,7 @@ const createOrder = async (req, res) => {
       userId,
       items: validatedItems,
       totalPrice,
+      address,
     });
 
     // Reduce stock for ordered products
@@ -117,9 +118,31 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+// Get all adresses from previous orders
+const getAddresses = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const orders = await Order.find({ userId });
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No orders found for this user" });
+    }
+
+    const addresses = orders.map((order) => order.address);
+    res
+      .status(200)
+      .json({ message: "Addresses retrieved successfully", addresses });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error retrieving addresses", error: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
   getUserOrders,
   updateOrderStatus,
   deleteOrder,
+  getAddresses,
 };
