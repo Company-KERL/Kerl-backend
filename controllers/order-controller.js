@@ -1,5 +1,7 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const Razorpay = require("razorpay");
+require("dotenv").config();
 
 const createOrder = async (req, res) => {
   const { userId, items, address } = req.body;
@@ -31,6 +33,23 @@ const createOrder = async (req, res) => {
       });
     }
 
+    var instance = new Razorpay({
+      key_id: process.env.KEY_ID,
+      key_secret: process.env.KEY_SECRET,
+    });
+
+    const razorpayOrder = await instance.orders.create({
+      amount: totalPrice * 100, // Amount in paise
+      currency: "INR",
+      receipt: require("crypto").randomBytes(16).toString("hex"),
+    });
+
+    if (!razorpayOrder) {
+      return res
+        .status(500)
+        .json({ message: "Failed to create Razorpay order" });
+    }
+
     const order = new Order({
       userId,
       items: validatedItems,
@@ -46,7 +65,11 @@ const createOrder = async (req, res) => {
     }
 
     await order.save();
-    res.status(201).json({ message: "Order created successfully", order });
+    res.status(201).json({
+      message: "Order created successfully",
+      order,
+      orderId: razorpayOrder.id,
+    });
   } catch (error) {
     res
       .status(500)

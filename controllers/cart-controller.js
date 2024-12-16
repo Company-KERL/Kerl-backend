@@ -116,11 +116,11 @@ const getCartLength = async (req, res) => {
     // Return the total quantity
     res.status(200).json({ message: "Cart retrieved", cartLength });
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving cart", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error retrieving cart", error: error.message });
   }
 };
-
-
 
 // Update item quantity in the cart
 const updateCartItemQuantity = async (req, res) => {
@@ -133,7 +133,9 @@ const updateCartItemQuantity = async (req, res) => {
     }
 
     const itemIndex = cart.items.findIndex(
-      (item) => item.productId.toString() === productId && item.selectedSizeIndex === selectedSizeIndex
+      (item) =>
+        item.productId.toString() === productId &&
+        item.selectedSizeIndex === selectedSizeIndex
     );
 
     if (itemIndex === -1) {
@@ -158,10 +160,35 @@ const updateCartItemQuantity = async (req, res) => {
   }
 };
 
+// Clear the Cart
+const clearCart = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+    const deleted = await Cart.deleteOne({ userId });
+
+    if (deleted.deletedCount === 0) {
+      return res
+        .status(500)
+        .json({ message: "Error clearing cart", error: err.message });
+    }
+    res.status(200).json({ message: "Cart cleared successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error clearing cart", error: error.message });
+  }
+};
+
 module.exports = {
   addItemToCart,
   removeItemFromCart,
   getCartItems,
   updateCartItemQuantity,
-  getCartLength
+  getCartLength,
+  clearCart,
 };

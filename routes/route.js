@@ -27,6 +27,7 @@ router.delete("/cart", cartController.removeItemFromCart);
 router.get("/cart/:userId", cartController.getCartItems);
 router.put("/cart", cartController.updateCartItemQuantity);
 router.get("/cart/:userId/length", cartController.getCartLength);
+router.delete("/cart/:userId", cartController.clearCart);
 
 // Define Order routes
 router.post("/orders", orderController.createOrder);
