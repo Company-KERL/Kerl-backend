@@ -64,7 +64,9 @@ const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId }).populate("items.productId");
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: "No orders found for this user" });
+      return res
+        .status(404)
+        .json({ message: "No orders found for this user", orders });
     }
 
     res.status(200).json({ message: "Orders retrieved successfully", orders });

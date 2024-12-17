@@ -34,8 +34,10 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
     address: {
-      type: String,
-      required: true,
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      zip: { type: String, required: true },
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
