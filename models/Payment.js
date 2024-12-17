@@ -7,17 +7,12 @@ const paymentSchema = new mongoose.Schema(
       ref: "Order",
       required: true,
     },
-    paymentMethod: {
-      type: String,
-      enum: ["credit_card", "paypal", "net_banking"],
-      required: true,
-    },
     status: {
       type: String,
       enum: ["completed", "failed", "pending"],
       default: "pending",
     },
-    transactionId: { type: String },
+    paymentId: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

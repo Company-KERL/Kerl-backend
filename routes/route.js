@@ -3,6 +3,7 @@ const userController = require("../controllers/user-controller");
 const productController = require("../controllers/product-controller");
 const cartController = require("../controllers/cart-controller");
 const orderController = require("../controllers/order-controller");
+const paymentController = require("../controllers/payment-controller");
 
 const router = express.Router();
 
@@ -35,5 +36,9 @@ router.get("/orders/:userId", orderController.getUserOrders);
 router.put("/orders", orderController.updateOrderStatus);
 router.delete("/orders/:orderId", orderController.deleteOrder);
 router.get("/orders/addresses/:userId", orderController.getAddresses);
+
+// Define Payment routes
+router.post("/payment/order", paymentController.createPayment);
+router.put("/payment/update", paymentController.updatePayment);
 
 module.exports = router;
