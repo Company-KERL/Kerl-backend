@@ -26,7 +26,7 @@ const createPayment = async (req, res) => {
     }
     await Payment.create({
       orderId,
-      paymentId: razorpayOrder.id,
+      rpOrderId: razorpayOrder.id,
       status: "pending",
     });
     res
@@ -57,6 +57,11 @@ const updatePayment = async (req, res) => {
       return res.status(404).json({ message: "Payment not found" });
     }
 
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
     // Validate Razorpay signature
     const generatedSignature = crypto
       .createHmac("sha256", process.env.KEY_SECRET)
@@ -64,20 +69,22 @@ const updatePayment = async (req, res) => {
       .digest("hex");
 
     if (generatedSignature !== razorpaySignature) {
+      payment.status = "failed";
+      order.paymentStatus = "failed";
+      await payment.save();
+      await order.save();
       return res.status(400).json({ message: "Invalid signature" });
     }
 
     // Update payment status
     payment.status = "completed";
-    payment.razorpayPaymentId = razorpayPaymentId;
-    payment.razorpaySignature = razorpaySignature;
+    payment.rpPaymentId = razorpayPaymentId;
+    payment.rpSignature = razorpaySignature;
+    payment.rpOrderId = razorpayOrderId;
     await payment.save();
 
     // Update associated order status
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+
     order.paymentStatus = "completed";
     await order.save();
 
