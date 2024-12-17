@@ -44,6 +44,7 @@ const signup = async (req, res) => {
     const username = await generateUsername(name);
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
+      name,
       username,
       email,
       password: hashedPassword,
@@ -147,9 +148,10 @@ const updateUser = async (req, res) => {
 
   try {
     // Verify the token
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await User.find((u) => u.id === decoded.userId);
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
+    // Now fetch the full user data from the database using the userId
+    const user = await User.findById(decoded.userId).select("-password"); // Exclude the password
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -159,10 +161,9 @@ const updateUser = async (req, res) => {
 
     if (address) user.address = address;
     if (phone) user.phone = phone;
+    user.save();
 
-    res
-      .status(200)
-      .json({ message: "User details updated successfully", user });
+    res.status(200).json({ message: "User details updated successfully" });
   } catch (error) {
     res.status(401).json({ message: "Invalid token" });
   }
