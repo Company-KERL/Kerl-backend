@@ -22,7 +22,10 @@ const createPayment = async (req, res) => {
     if (!razorpayOrder) {
       return res
         .status(500)
-        .json({ message: "Failed to create Razorpay order" });
+        .json({
+          message: "Failed to create Razorpay order",
+          error: razorpayOrder.error,
+        });
     }
     await Payment.create({
       orderId,

@@ -196,4 +196,26 @@ const checkAuth = async (req, res) => {
   }
 };
 
+const sendResetLink = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    const user = await User({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Send reset link to user's email
+    // ...
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
 module.exports = { signup, login, logout, getProfile, updateUser, checkAuth };

@@ -103,14 +103,14 @@ const getCartItems = async (req, res) => {
 const getCartLength = async (req, res) => {
   const { userId } = req.params;
   try {
-    // Find the cart for the user and populate the product details
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return res
+        .status(200)
+        .json({ message: "No cart retrieved", cartLength: 0 });
     }
 
-    // Calculate the total quantity of items in the cart
     const cartLength = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
     // Return the total quantity

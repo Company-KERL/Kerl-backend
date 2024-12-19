@@ -130,7 +130,10 @@ const getAddresses = async (req, res) => {
   try {
     const orders = await Order.find({ userId });
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: "No orders found for this user" });
+      return res
+        .ok()
+        .status(200)
+        .json({ message: "No orders found for this user", addresses: [] });
     }
 
     const addresses = orders.map((order) => order.address);
