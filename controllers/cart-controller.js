@@ -70,7 +70,11 @@ const removeItemFromCart = async (req, res) => {
     );
 
     // Update total price
-    cart.totalPrice = cart.items.reduce((total, item) => total + item.price, 0);
+    if(item.offer)
+      cart.totalPrice = cart.items.reduce((total, item) => total + item.offer, 0);
+    else
+      cart.totalPrice = cart.items.reduce((total, item) => total + item.price, 0);
+    
 
     await cart.save();
     res.status(200).json({ message: "Item removed from cart", cart });
